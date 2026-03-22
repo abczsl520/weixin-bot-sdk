@@ -1,31 +1,39 @@
 <div align="center">
 
-<img src="https://img.shields.io/badge/WeChat-07C160?style=for-the-badge&logo=wechat&logoColor=white" alt="WeChat" />
+<img src="https://img.shields.io/badge/微信-07C160?style=for-the-badge&logo=wechat&logoColor=white" alt="WeChat" />
 <img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
-<img src="https://img.shields.io/badge/Zero_Deps-brightgreen?style=for-the-badge" alt="Zero Dependencies" />
+<img src="https://img.shields.io/badge/零依赖-brightgreen?style=for-the-badge" alt="Zero Dependencies" />
 
 # 🤖 weixin-bot-sdk
 
-### The missing WeChat Bot SDK for Node.js
+### Node.js 微信机器人 SDK — 基于官方 iLink Bot API
 
-**Official iLink Bot API. Zero dependencies. Full TypeScript. Media support.**
+**零依赖。完整 TypeScript 支持。收发图片/视频/文件/语音。**
 
 [![npm version](https://img.shields.io/npm/v/weixin-bot-sdk.svg?style=flat-square)](https://www.npmjs.com/package/weixin-bot-sdk)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
 [![Node.js](https://img.shields.io/badge/Node.js-%3E%3D18-green.svg?style=flat-square)](https://nodejs.org)
-[![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg?style=flat-square)](#typescript)
+[![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg?style=flat-square)](#-typescript)
 
-[English](#-why-this-exists) · [中文文档](./README.zh-CN.md) · [Wiki](https://github.com/abczsl520/weixin-bot-sdk/wiki) · [API Reference](https://github.com/abczsl520/weixin-bot-sdk/wiki/API-Reference)
+中文 · [English](./README.en.md) · [Wiki](https://github.com/abczsl520/weixin-bot-sdk/wiki) · [API 参考](https://github.com/abczsl520/weixin-bot-sdk/wiki/API-Reference)
 
 </div>
 
 ---
 
-## 💡 Why This Exists
+## ⚠️ 兼容性说明
 
-In 2026, WeChat quietly launched an **official Bot API** — but with no public SDK.
+> **目前仅支持 iOS 微信 8.0.70 版本**，安卓暂不支持（需等微信官方开放）。
+>
+> 如果你的 iOS 微信刚更新到最新版本，需要**在后台关掉微信再重新打开**，才能正常对接 Bot。
 
-The only way to use it was through a framework plugin buried in npm. We reverse-engineered it and extracted a clean, standalone SDK.
+---
+
+## 💡 这是什么
+
+2026 年，微信悄悄上线了官方 Bot API（**iLink Bot**），但没有公开的 SDK。
+
+唯一的使用方式是通过某个框架的插件。我们逆向分析了那个插件，提取出了一个干净的、零依赖的独立 SDK。
 
 ```js
 import { WeixinBot } from 'weixin-bot-sdk';
@@ -33,45 +41,45 @@ import { WeixinBot } from 'weixin-bot-sdk';
 const bot = new WeixinBot();
 
 bot.on('message', async (msg) => {
-  await bot.reply(msg, `You said: ${msg.text}`);
+  await bot.reply(msg, `你说的是: ${msg.text}`);
 });
 
 await bot.login({
-  onQrCode: (url) => console.log('Scan:', url),
+  onQrCode: (url) => console.log('扫码:', url),
 });
 
 bot.start();
 ```
 
-**6 lines. That's a working WeChat bot.**
+**6 行代码，一个微信机器人就跑起来了。**
 
 ---
 
-## 🏆 Why Choose This Over Alternatives
+## 🏆 为什么选这个
 
-| | weixin-bot-sdk | wxhook / itchat | Wechaty | Official MP API |
+| | weixin-bot-sdk | wxhook / itchat | Wechaty | 公众号 API |
 |---|:-:|:-:|:-:|:-:|
-| **Ban risk** | ✅ Zero | ❌ High | 🟡 Depends | ✅ Zero |
-| **Dependencies** | ✅ 0 | ❌ Many | ❌ Heavy | 🟡 Few |
-| **Personal messages** | ✅ Yes | ✅ Yes | ✅ Yes | ❌ No |
-| **Media (img/video/file)** | ✅ Full | ✅ Full | ✅ Full | ✅ Full |
-| **TypeScript** | ✅ Built-in | ❌ No | ✅ Yes | 🟡 Community |
-| **WeChat PC needed** | ✅ No | ❌ Yes | 🟡 Depends | ✅ No |
-| **Setup time** | ✅ 2 min | ❌ 30+ min | 🟡 10 min | ❌ Days (review) |
-| **Stability** | ✅ Official API | ❌ Breaks often | 🟡 Varies | ✅ Stable |
-| **Code size** | ✅ ~700 lines | ❌ Thousands | ❌ Massive | 🟡 Medium |
+| **封号风险** | ✅ 无 | ❌ 高 | 🟡 看实现 | ✅ 无 |
+| **依赖** | ✅ 零 | ❌ 很多 | ❌ 很重 | 🟡 少量 |
+| **个人消息** | ✅ 支持 | ✅ 支持 | ✅ 支持 | ❌ 不支持 |
+| **媒体（图/视频/文件）** | ✅ 完整 | ✅ 完整 | ✅ 完整 | ✅ 完整 |
+| **TypeScript** | ✅ 内置 | ❌ 无 | ✅ 有 | 🟡 社区 |
+| **需要微信 PC** | ✅ 不需要 | ❌ 需要 | 🟡 看实现 | ✅ 不需要 |
+| **搭建时间** | ✅ 2 分钟 | ❌ 30+ 分钟 | 🟡 10 分钟 | ❌ 几天（审核） |
+| **稳定性** | ✅ 官方 API | ❌ 经常挂 | 🟡 不一定 | ✅ 稳定 |
+| **代码量** | ✅ ~700 行 | ❌ 几千行 | ❌ 巨大 | 🟡 中等 |
 
 ---
 
-## ⚡ Quick Start
+## ⚡ 快速开始
 
-### Install
+### 安装
 
 ```bash
 npm install weixin-bot-sdk
 ```
 
-### Echo Bot (5 minutes)
+### Echo Bot（5 分钟）
 
 ```js
 import { WeixinBot } from 'weixin-bot-sdk';
@@ -83,25 +91,25 @@ const bot = new WeixinBot({
 bot.on('message', async (msg) => {
   switch (msg.type) {
     case 'text':
-      await bot.reply(msg, `Echo: ${msg.text}`);
+      await bot.reply(msg, `收到: ${msg.text}`);
       break;
     case 'image':
-      await bot.reply(msg, 'Nice picture! 📸');
+      await bot.reply(msg, '好图！📸');
       break;
     case 'voice':
-      await bot.reply(msg, `I heard: ${msg.text}`);
+      await bot.reply(msg, `语音转文字: ${msg.text}`);
       break;
   }
 });
 
 await bot.login({
-  onQrCode: (url) => console.log('📱 Scan with WeChat:', url),
+  onQrCode: (url) => console.log('📱 用微信扫码:', url),
 });
 
 bot.start();
 ```
 
-### AI Chatbot (10 minutes)
+### AI 聊天机器人（10 分钟）
 
 ```js
 import { WeixinBot } from 'weixin-bot-sdk';
@@ -111,10 +119,10 @@ const bot = new WeixinBot();
 bot.on('message', async (msg) => {
   if (msg.type !== 'text') return;
 
-  // Send typing indicator
+  // 显示"正在输入..."
   await bot.sendTyping(msg.from);
 
-  // Call any AI API
+  // 调用任意 AI API
   const reply = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
@@ -130,27 +138,27 @@ bot.on('message', async (msg) => {
   await bot.reply(msg, reply.choices[0].message.content);
 });
 
-await bot.login({ onQrCode: (url) => console.log('Scan:', url) });
+await bot.login({ onQrCode: (url) => console.log('扫码:', url) });
 bot.start();
 ```
 
 ---
 
-## 📸 Media Support
+## 📸 媒体支持
 
-Send and receive images, videos, files, and voice messages — all with AES-128-ECB encryption handled automatically.
+收发图片、视频、文件、语音 — AES-128-ECB 加密自动处理。
 
 ```js
-// Send image
+// 发图片
 await bot.sendImage(userId, fs.readFileSync('photo.jpg'));
 
-// Send video
+// 发视频
 await bot.sendVideo(userId, fs.readFileSync('clip.mp4'));
 
-// Send file
+// 发文件
 await bot.sendFile(userId, fs.readFileSync('doc.pdf'), 'report.pdf');
 
-// Download received media
+// 下载收到的媒体
 bot.on('message', async (msg) => {
   if (msg.type === 'image') {
     const buf = await bot.downloadImage(msg.image);
@@ -161,46 +169,46 @@ bot.on('message', async (msg) => {
 
 ---
 
-## 🏗️ Architecture
+## 🏗️ 架构
 
 ```
-┌─────────────┐     QR Login      ┌──────────────────────┐
-│             │ ◄────────────────► │  iLink Bot API       │
-│  Your Code  │                    │  ilinkai.weixin.qq.com│
-│      +      │ ◄── long-poll ──── │  (Tencent Official)  │
-│  WeixinBot  │ ── sendMessage ──► │                      │
-│             │                    └──────────────────────┘
+┌─────────────┐     扫码登录      ┌──────────────────────┐
+│             │ ◄──────────────► │  iLink Bot API       │
+│  你的代码    │                  │  ilinkai.weixin.qq.com│
+│      +      │ ◄── long-poll ── │  (腾讯官方)           │
+│  WeixinBot  │ ── sendMessage ─►│                      │
+│             │                  └──────────────────────┘
 └──────┬──────┘
-       │ upload / download (AES-128-ECB)
+       │ 上传/下载（AES-128-ECB 加密）
        ▼
 ┌──────────────────────────────┐
-│  WeChat CDN                  │
+│  微信 CDN                    │
 │  novac2c.cdn.weixin.qq.com  │
 └──────────────────────────────┘
 ```
 
-**How the iLink Bot API works:**
+**iLink Bot API 工作流程：**
 
-1. `GET /get_bot_qrcode` → Get QR code URL
-2. `GET /get_qrcode_status` → Long-poll until user scans (returns `bot_token`)
-3. `POST /getupdates` → Long-poll for new messages (cursor-based)
-4. `POST /sendmessage` → Send reply with `context_token`
-5. `POST /getuploadurl` → Get CDN upload URL for media
-6. Media encrypted with AES-128-ECB, key from `aes_key` field
+1. `GET /get_bot_qrcode` → 获取二维码
+2. `GET /get_qrcode_status` → Long-poll 等用户扫码（返回 `bot_token`）
+3. `POST /getupdates` → Long-poll 获取新消息（游标分页）
+4. `POST /sendmessage` → 发送回复（带 `context_token`）
+5. `POST /getuploadurl` → 获取 CDN 上传地址
+6. 媒体用 AES-128-ECB 加密，密钥在 `aes_key` 字段
 
 ---
 
-## 📖 API at a Glance
+## 📖 API 速览
 
-### WeixinBot (High-Level)
+### WeixinBot（高层封装）
 
 ```js
 const bot = new WeixinBot({ credentialsPath: '.wx-credentials.json' });
 
-// Login
+// 登录
 await bot.login({ onQrCode, onStatus, timeoutMs, maxQrRefresh });
 
-// Messaging
+// 发消息
 await bot.reply(msg, text);
 await bot.sendText(userId, text, contextToken);
 await bot.sendImage(userId, buffer);
@@ -208,24 +216,24 @@ await bot.sendVideo(userId, buffer);
 await bot.sendFile(userId, buffer, filename);
 await bot.sendTyping(userId);
 
-// Media download
+// 下载媒体
 const buf = await bot.downloadImage(imageItem);
 const buf = await bot.downloadVoice(voiceItem);
 const buf = await bot.downloadFile(fileItem);
 const buf = await bot.downloadVideo(videoItem);
 
-// Events
+// 事件
 bot.on('message', (parsed, raw) => { });
 bot.on('login', (result) => { });
 bot.on('error', (err) => { });
 bot.on('session:expired', () => { });
 
-// Lifecycle
+// 生命周期
 bot.start();
 bot.stop();
 ```
 
-### WeixinBotApi (Low-Level)
+### WeixinBotApi（底层 API）
 
 ```js
 import { WeixinBotApi } from 'weixin-bot-sdk';
@@ -235,7 +243,7 @@ const updates = await api.getUpdates(buf);
 await api.sendText(userId, text, contextToken);
 ```
 
-### Crypto Utilities
+### 加密工具
 
 ```js
 import { encryptAesEcb, decryptAesEcb, parseAesKey } from 'weixin-bot-sdk';
@@ -245,13 +253,13 @@ const encrypted = encryptAesEcb(key, plainBuffer);
 const decrypted = decryptAesEcb(key, encryptedBuffer);
 ```
 
-> Full API docs: [Wiki → API Reference](https://github.com/abczsl520/weixin-bot-sdk/wiki/API-Reference)
+> 完整 API 文档：[Wiki → API Reference](https://github.com/abczsl520/weixin-bot-sdk/wiki/API-Reference)
 
 ---
 
 ## 📝 TypeScript
 
-Full type declarations included. Zero config needed.
+完整类型声明，开箱即用。
 
 ```ts
 import { WeixinBot, ParsedMessage } from 'weixin-bot-sdk';
@@ -267,57 +275,58 @@ bot.on('message', async (msg: ParsedMessage) => {
 
 ---
 
-## 📂 Project Structure
+## 📂 项目结构
 
 ```
 src/
-  index.js    — Entry point, re-exports all modules
-  bot.js      — WeixinBot high-level class (event-driven)
-  api.js      — WeixinBotApi HTTP client
-  cdn.js      — CDN media upload/download + AES encryption
-  crypto.js   — AES-128-ECB utilities
+  index.js    — 入口，导出所有模块
+  bot.js      — WeixinBot 高层类（事件驱动）
+  api.js      — WeixinBotApi HTTP 客户端
+  cdn.js      — CDN 媒体上传/下载 + AES 加密
+  crypto.js   — AES-128-ECB 工具函数
 types/
-  index.d.ts  — Full TypeScript declarations
+  index.d.ts  — 完整 TypeScript 类型声明
 examples/
-  echo-bot.js       — Echo bot
-  low-level-api.js  — Direct API usage
-  ai-chatbot.js     — AI chatbot with OpenAI
+  echo-bot.js       — 回声机器人
+  low-level-api.js  — 直接使用底层 API
+  ai-chatbot.js     — AI 聊天机器人（OpenAI）
 ```
 
 ---
 
-## 📚 Examples
+## 📚 示例
 
-| Example | Description |
-|---------|-------------|
-| [echo-bot.js](./examples/echo-bot.js) | Simple echo bot — replies with what you send |
-| [low-level-api.js](./examples/low-level-api.js) | Direct API usage without WeixinBot wrapper |
-| [ai-chatbot.js](./examples/ai-chatbot.js) | AI chatbot powered by OpenAI/Claude |
-
----
-
-## ⚠️ Important Notes
-
-- Uses WeChat's **official iLink Bot API** — not a hook, not a hack
-- Bots can only receive messages users **send directly to the bot**
-- Bots **cannot** monitor all chats or act as a personal account
-- Tokens may expire; the SDK handles auto-refresh during login
-- **Zero ban risk** — this is a legitimate bot platform by Tencent
+| 示例 | 说明 |
+|------|------|
+| [echo-bot.js](./examples/echo-bot.js) | 回声机器人 — 原样返回你发的消息 |
+| [low-level-api.js](./examples/low-level-api.js) | 不用 WeixinBot 封装，直接调 API |
+| [ai-chatbot.js](./examples/ai-chatbot.js) | AI 聊天机器人（OpenAI/Claude） |
 
 ---
 
-## 🔗 Related
+## ⚠️ 重要说明
 
-| Project | Description |
-|---------|-------------|
-| [weixin-bot](https://github.com/abczsl520/weixin-bot) | One-command CLI — `npx weixin-bot` for instant AI chatbot |
-| [Wiki](https://github.com/abczsl520/weixin-bot-sdk/wiki) | Full documentation, tutorials, architecture deep-dive |
+- 使用微信官方 **iLink Bot API** — 不是 hook，不是注入
+- Bot 只能收到用户**主动发给它**的消息
+- Bot **不能**监听所有聊天或冒充个人号
+- Token 可能过期，SDK 会在登录时自动刷新二维码（最多 3 次）
+- **零封号风险** — 这是腾讯的正规 Bot 平台
+- **目前仅支持 iOS 微信 8.0.70**，安卓暂不支持
 
 ---
 
-## Contributing
+## 🔗 相关项目
 
-Contributions welcome! Please read [CONTRIBUTING.md](./CONTRIBUTING.md) first.
+| 项目 | 说明 |
+|------|------|
+| [weixin-bot](https://github.com/abczsl520/weixin-bot) | 一键 CLI — `npx weixin-bot` 即可启动 AI 聊天机器人 |
+| [Wiki](https://github.com/abczsl520/weixin-bot-sdk/wiki) | 完整文档、教程、架构详解 |
+
+---
+
+## 贡献
+
+欢迎贡献！请先阅读 [CONTRIBUTING.md](./CONTRIBUTING.md)。
 
 ---
 
@@ -327,8 +336,8 @@ MIT © 2026
 
 <div align="center">
 
-**⭐ Star if this helped you build something cool!**
+**⭐ 觉得有用？给个 Star 吧！**
 
-**The first standalone SDK for WeChat's official Bot API.**
+**首个基于微信官方 Bot API 的独立 SDK。**
 
 </div>

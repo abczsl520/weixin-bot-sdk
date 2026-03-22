@@ -16,7 +16,7 @@
     "types/",
     "LICENSE",
     "README.md",
-    "README.zh-CN.md"
+    "README.en.md"
   ],
   "scripts": {
     "example:echo": "node examples/echo-bot.js",
