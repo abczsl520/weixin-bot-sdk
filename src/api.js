@@ -19,7 +19,6 @@ function buildHeaders(token, body) {
   const headers = {
     'Content-Type': 'application/json',
     'AuthorizationType': 'ilink_bot_token',
-    'Content-Length': String(Buffer.byteLength(body, 'utf-8')),
     'X-WECHAT-UIN': randomWechatUin(),
   };
   if (token) headers['Authorization'] = `Bearer ${token}`;
@@ -102,7 +101,7 @@ export class WeixinBotApi {
     if (onQrCode) onQrCode(qr.qrcode_img_content);
 
     const deadline = Date.now() + timeoutMs;
-    let refreshCount = 1;
+    let refreshCount = 0;
 
     while (Date.now() < deadline) {
       const status = await this.pollQrStatus(qr.qrcode);
@@ -120,7 +119,7 @@ export class WeixinBotApi {
       }
       if (status.status === 'expired') {
         refreshCount++;
-        if (refreshCount > maxQrRefresh) {
+        if (refreshCount >= maxQrRefresh) {
           throw new Error(`QR code expired ${maxQrRefresh} times, giving up`);
         }
         // Auto-refresh QR code
@@ -147,7 +146,11 @@ export class WeixinBotApi {
         timeoutMs: DEFAULT_LONG_POLL_TIMEOUT,
         label: 'getUpdates',
       });
-      return JSON.parse(raw);
+      try {
+        return JSON.parse(raw);
+      } catch {
+        return { ret: -1, msgs: [], get_updates_buf: getUpdatesBuf, _parseError: true };
+      }
     } catch (err) {
       if (err.name === 'AbortError') {
         return { ret: 0, msgs: [], get_updates_buf: getUpdatesBuf };
@@ -181,8 +184,9 @@ export class WeixinBotApi {
   }
 
   async sendText(toUserId, text, contextToken) {
+    if (text == null) text = '';
     return this.sendMessage(toUserId, [
-      { type: 1, text_item: { text } }
+      { type: 1, text_item: { text: String(text) } }
     ], contextToken);
   }
 

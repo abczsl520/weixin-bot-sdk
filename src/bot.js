@@ -95,6 +95,9 @@ export class WeixinBot extends EventEmitter {
   }
 
   async _pollLoop() {
+    let errorBackoff = 3000;
+    const MAX_BACKOFF = 60000;
+
     while (this._running) {
       try {
         const resp = await this.api.getUpdates(this._updatesBuf);
@@ -109,6 +112,9 @@ export class WeixinBot extends EventEmitter {
           this.stop();
           return;
         }
+
+        // Reset backoff on success
+        errorBackoff = 3000;
 
         if (resp.msgs?.length) {
           for (const msg of resp.msgs) {
@@ -134,8 +140,9 @@ export class WeixinBot extends EventEmitter {
         this.emit('poll', resp);
       } catch (err) {
         this.emit('error', err);
-        // Back off on error
-        await new Promise(r => setTimeout(r, 3000));
+        // Exponential backoff on error
+        await new Promise(r => setTimeout(r, errorBackoff));
+        errorBackoff = Math.min(errorBackoff * 2, MAX_BACKOFF);
       }
     }
   }

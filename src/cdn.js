@@ -25,18 +25,36 @@ function buildCdnUploadUrl(cdnBaseUrl, uploadParam, filekey) {
 export async function downloadMedia(encryptedQueryParam, aesKeyBase64, cdnBaseUrl = DEFAULT_CDN_URL) {
   const key = parseAesKey(aesKeyBase64);
   const url = buildCdnDownloadUrl(encryptedQueryParam, cdnBaseUrl);
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`CDN download failed: ${res.status}`);
-  const encrypted = Buffer.from(await res.arrayBuffer());
-  return decryptAesEcb(encrypted, key);
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 120000); // 2 min timeout
+  try {
+    const res = await fetch(url, { signal: controller.signal });
+    clearTimeout(timer);
+    if (!res.ok) throw new Error(`CDN download failed: ${res.status}`);
+    const encrypted = Buffer.from(await res.arrayBuffer());
+    return decryptAesEcb(encrypted, key);
+  } catch (err) {
+    clearTimeout(timer);
+    if (err.name === 'AbortError') throw new Error('CDN download timeout (120s)');
+    throw err;
+  }
 }
 
 /** Download without decryption (for cases where aes_key is not available). */
 export async function downloadMediaRaw(encryptedQueryParam, cdnBaseUrl = DEFAULT_CDN_URL) {
   const url = buildCdnDownloadUrl(encryptedQueryParam, cdnBaseUrl);
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`CDN download failed: ${res.status}`);
-  return Buffer.from(await res.arrayBuffer());
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 120000);
+  try {
+    const res = await fetch(url, { signal: controller.signal });
+    clearTimeout(timer);
+    if (!res.ok) throw new Error(`CDN download failed: ${res.status}`);
+    return Buffer.from(await res.arrayBuffer());
+  } catch (err) {
+    clearTimeout(timer);
+    if (err.name === 'AbortError') throw new Error('CDN download timeout (120s)');
+    throw err;
+  }
 }
 
 /**
@@ -60,7 +78,7 @@ export async function uploadToCdn(buf, uploadParam, filekey, aeskey, cdnBaseUrl 
       const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/octet-stream' },
-        body: new Uint8Array(ciphertext),
+        body: ciphertext,
       });
       if (res.status >= 400 && res.status < 500) {
         throw new Error(`CDN upload client error ${res.status}`);
@@ -88,6 +106,9 @@ export async function uploadToCdn(buf, uploadParam, filekey, aeskey, cdnBaseUrl 
  * Returns all info needed to construct a send message with media.
  */
 export async function prepareUpload(api, buf, toUserId, mediaType = 1) {
+  if (!Buffer.isBuffer(buf) || buf.length === 0) {
+    throw new Error('prepareUpload: buf must be a non-empty Buffer');
+  }
   const rawsize = buf.length;
   const rawfilemd5 = crypto.createHash('md5').update(buf).digest('hex');
   const filesize = aesEcbPaddedSize(rawsize);
