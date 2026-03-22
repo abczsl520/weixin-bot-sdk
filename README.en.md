@@ -25,7 +25,7 @@
 
 > **iOS**: Supports WeChat 8.0.70. After updating to the latest version, you must **force-quit WeChat from the background and reopen it** before the bot can connect.
 >
-> **Android**: Now supported! After generating the QR code with the SDK or Bot, scanning it will prompt a WeChat update. Download the update and scan again. Android may have some bugs — please test first.
+> **Android**: Now supported! Scanning the QR code will prompt a WeChat update. Update and scan again. May have some bugs — please test first (on some Android devices the bot won't appear on the home screen; search for it or find it in the Features tab).
 
 ---
 
