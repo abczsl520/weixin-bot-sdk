@@ -1,6 +1,6 @@
 {
   "name": "weixin-bot-sdk",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Unofficial WeChat Bot SDK for Node.js — built on the iLink Bot API. Zero dependencies. Full TypeScript support.",
   "type": "module",
   "main": "src/index.js",

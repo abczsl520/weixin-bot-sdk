@@ -104,8 +104,8 @@ export class WeixinBot extends EventEmitter {
         }
 
         // Session expired
-        if (resp.errcode === -14) {
-          this.emit('session:expired');
+        if (resp.errcode === -14 || resp.errcode === -13) {
+          this.emit('session:expired', resp.errcode);
           this.stop();
           return;
         }
@@ -115,9 +115,14 @@ export class WeixinBot extends EventEmitter {
             // Only process user messages (not our own bot messages)
             if (msg.message_type !== MessageType.USER) continue;
 
-            // Cache context_token for replies
+            // Cache context_token for replies (limit cache size)
             if (msg.context_token && msg.from_user_id) {
               this._contextTokens.set(msg.from_user_id, msg.context_token);
+              // Evict oldest entries if cache grows too large
+              if (this._contextTokens.size > 1000) {
+                const first = this._contextTokens.keys().next().value;
+                this._contextTokens.delete(first);
+              }
             }
 
             // Parse message content
@@ -221,7 +226,7 @@ export class WeixinBot extends EventEmitter {
       image_item: {
         media: {
           encrypt_query_param: uploaded.downloadEncryptedQueryParam,
-          aes_key: Buffer.from(uploaded.aeskey).toString('base64'),
+          aes_key: Buffer.from(uploaded.aeskey, 'hex').toString('base64'),
           encrypt_type: 1,
         },
         mid_size: uploaded.fileSizeCiphertext,
@@ -245,7 +250,7 @@ export class WeixinBot extends EventEmitter {
       video_item: {
         media: {
           encrypt_query_param: uploaded.downloadEncryptedQueryParam,
-          aes_key: Buffer.from(uploaded.aeskey).toString('base64'),
+          aes_key: Buffer.from(uploaded.aeskey, 'hex').toString('base64'),
           encrypt_type: 1,
         },
         video_size: uploaded.fileSizeCiphertext,
@@ -268,7 +273,7 @@ export class WeixinBot extends EventEmitter {
       file_item: {
         media: {
           encrypt_query_param: uploaded.downloadEncryptedQueryParam,
-          aes_key: Buffer.from(uploaded.aeskey).toString('base64'),
+          aes_key: Buffer.from(uploaded.aeskey, 'hex').toString('base64'),
           encrypt_type: 1,
         },
         file_name: fileName,
@@ -286,10 +291,8 @@ export class WeixinBot extends EventEmitter {
   async downloadImage(imageItem, cdnBaseUrl) {
     const media = imageItem.media;
     if (!media?.encrypt_query_param) throw new Error('No encrypt_query_param in image');
-    const aesKey = imageItem.aeskey
-      ? Buffer.from(imageItem.aeskey, 'hex').toString('base64')
-      : media.aes_key;
-    return downloadMedia(media.encrypt_query_param, aesKey, cdnBaseUrl || this.api.cdnUrl);
+    if (!media.aes_key) throw new Error('No aes_key in image media');
+    return downloadMedia(media.encrypt_query_param, media.aes_key, cdnBaseUrl || this.api.cdnUrl);
   }
 
   async downloadVoice(voiceItem, cdnBaseUrl) {
