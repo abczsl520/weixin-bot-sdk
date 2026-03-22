@@ -319,7 +319,7 @@ examples/
 
 | 项目 | 说明 |
 |------|------|
-| [weixin-bot](https://github.com/abczsl520/weixin-bot) | 一键 CLI — `npx weixin-bot` 即可启动 AI 聊天机器人 |
+| [weixin-bot](https://github.com/abczsl520/weixin-bot) | 一键 CLI — `npx wx-ai-bot` 即可启动 AI 聊天机器人 |
 | [Wiki](https://github.com/abczsl520/weixin-bot-sdk/wiki) | 完整文档、教程、架构详解 |
 
 ---

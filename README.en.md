@@ -252,7 +252,7 @@ bot.on('message', async (msg: ParsedMessage) => {
 
 | Project | Description |
 |---------|-------------|
-| [weixin-bot](https://github.com/abczsl520/weixin-bot) | One-command CLI — `npx weixin-bot` for instant AI chatbot |
+| [weixin-bot](https://github.com/abczsl520/weixin-bot) | One-command CLI — `npx wx-ai-bot` for instant AI chatbot |
 | [Wiki](https://github.com/abczsl520/weixin-bot-sdk/wiki) | Full documentation, tutorials, architecture deep-dive |
 
 ---
