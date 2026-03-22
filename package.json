@@ -27,7 +27,7 @@
     "weixin", "wechat", "bot", "chatbot", "ilink",
     "wechat-bot", "weixin-bot", "messaging", "sdk"
   ],
-  "author": "",
+  "author": "abczsl520",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/abczsl520/weixin-bot-sdk.git"
