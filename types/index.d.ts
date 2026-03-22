@@ -34,6 +34,26 @@ export declare const UploadMediaType: {
   readonly VOICE: 4;
 };
 
+export declare const TypingStatus: {
+  readonly TYPING: 1;
+  readonly CANCEL: 2;
+};
+
+/** Voice encode_type: 1=pcm 2=adpcm 3=feature 4=speex 5=amr 6=silk 7=mp3 8=ogg-speex */
+export declare const VoiceEncodeType: {
+  readonly PCM: 1;
+  readonly ADPCM: 2;
+  readonly FEATURE: 3;
+  readonly SPEEX: 4;
+  readonly AMR: 5;
+  readonly SILK: 6;
+  readonly MP3: 7;
+  readonly OGG_SPEEX: 8;
+};
+
+/** Strip markdown formatting to plain text for WeChat delivery. */
+export declare function markdownToPlainText(text: string): string;
+
 // ── API Types ──
 
 export interface CDNMedia {
@@ -164,12 +184,14 @@ export interface ParsedMessage {
   timestamp?: number;
   contextToken?: string;
   text: string;
+  /** text with quoted context prepended: "[引用: xxx]\ntext" */
+  textWithQuote?: string;
   type: 'text' | 'image' | 'voice' | 'file' | 'video';
   image?: ImageItem;
   voice?: VoiceItem;
   file?: FileItem;
   video?: VideoItem;
-  quotedMessage?: { title?: string; item?: MessageItem };
+  quotedMessage?: { title?: string; item?: MessageItem; text?: string };
   raw: WeixinMessage;
 }
 
@@ -240,11 +262,19 @@ export declare class WeixinBot extends EventEmitter {
   sendImage(toUserId: string, imageBuf: Buffer, contextToken?: string, caption?: string): Promise<void>;
   sendVideo(toUserId: string, videoBuf: Buffer, contextToken?: string, caption?: string): Promise<void>;
   sendFile(toUserId: string, fileBuf: Buffer, fileName: string, contextToken?: string, caption?: string): Promise<void>;
+  sendVoice(toUserId: string, voiceBuf: Buffer, contextToken?: string, options?: {
+    encodeType?: number;
+    sampleRate?: number;
+    bitsPerSample?: number;
+    playtime?: number;
+  }): Promise<void>;
 
   downloadImage(imageItem: ImageItem, cdnBaseUrl?: string): Promise<Buffer>;
   downloadVoice(voiceItem: VoiceItem, cdnBaseUrl?: string): Promise<Buffer>;
   downloadFile(fileItem: FileItem, cdnBaseUrl?: string): Promise<Buffer>;
   downloadVideo(videoItem: VideoItem, cdnBaseUrl?: string): Promise<Buffer>;
+  /** Download raw CDN bytes without decryption. */
+  downloadRaw(encryptQueryParam: string, cdnBaseUrl?: string): Promise<Buffer>;
 
   sendTyping(userId: string, contextToken?: string): Promise<void>;
   cancelTyping(userId: string, contextToken?: string): Promise<void>;

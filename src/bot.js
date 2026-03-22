@@ -10,13 +10,37 @@
 import { EventEmitter } from 'node:events';
 import fs from 'node:fs';
 import { WeixinBotApi } from './api.js';
-import { downloadMedia, prepareUpload } from './cdn.js';
+import { downloadMedia, downloadMediaRaw, prepareUpload } from './cdn.js';
+
+/**
+ * Strip markdown formatting to plain text for WeChat delivery.
+ * Preserves newlines; strips code fences, images, links, tables, bold/italic.
+ */
+export function markdownToPlainText(text) {
+  let r = text;
+  r = r.replace(/```[^\n]*\n?([\s\S]*?)```/g, (_, code) => code.trim());
+  r = r.replace(/!\[[^\]]*\]\([^)]*\)/g, '');
+  r = r.replace(/\[([^\]]+)\]\([^)]*\)/g, '$1');
+  r = r.replace(/^\|[\s:|-]+\|$/gm, '');
+  r = r.replace(/^\|(.+)\|$/gm, (_, inner) => inner.split('|').map(c => c.trim()).join('  '));
+  r = r.replace(/(\*\*|__)(.*?)\1/g, '$2');
+  r = r.replace(/(\*|_)(.*?)\1/g, '$2');
+  r = r.replace(/~~(.*?)~~/g, '$1');
+  r = r.replace(/^#{1,6}\s+/gm, '');
+  r = r.replace(/^[>\s]*>/gm, '');
+  r = r.replace(/`([^`]+)`/g, '$1');
+  return r;
+}
 
 // Message type constants
 export const MessageType = { NONE: 0, USER: 1, BOT: 2 };
 export const MessageItemType = { NONE: 0, TEXT: 1, IMAGE: 2, VOICE: 3, FILE: 4, VIDEO: 5 };
 export const MessageState = { NEW: 0, GENERATING: 1, FINISH: 2 };
 export const UploadMediaType = { IMAGE: 1, VIDEO: 2, FILE: 3, VOICE: 4 };
+export const TypingStatus = { TYPING: 1, CANCEL: 2 };
+
+/** Voice encode_type constants: 1=pcm 2=adpcm 3=feature 4=speex 5=amr 6=silk 7=mp3 8=ogg-speex */
+export const VoiceEncodeType = { PCM: 1, ADPCM: 2, FEATURE: 3, SPEEX: 4, AMR: 5, SILK: 6, MP3: 7, OGG_SPEEX: 8 };
 
 export class WeixinBot extends EventEmitter {
   constructor(options = {}) {
@@ -166,10 +190,23 @@ export class WeixinBot extends EventEmitter {
       if (item.type === MessageItemType.TEXT && item.text_item?.text != null) {
         result.text = String(item.text_item.text);
         if (item.ref_msg) {
+          const ref = item.ref_msg;
+          const parts = [];
+          if (ref.title) parts.push(ref.title);
+          if (ref.message_item) {
+            // Extract text from quoted message
+            const refItem = ref.message_item;
+            if (refItem.text_item?.text) parts.push(refItem.text_item.text);
+          }
           result.quotedMessage = {
-            title: item.ref_msg.title,
-            item: item.ref_msg.message_item,
+            title: ref.title,
+            item: ref.message_item,
+            text: parts.join(' | '),
           };
+          // Prepend quoted context to text (like official SDK)
+          if (parts.length) {
+            result.textWithQuote = `[引用: ${parts.join(' | ')}]\n${result.text}`;
+          }
         }
       }
     }
@@ -293,13 +330,39 @@ export class WeixinBot extends EventEmitter {
     }
   }
 
+  async sendVoice(toUserId, voiceBuf, contextToken, options = {}) {
+    contextToken = contextToken || this._getContextToken(toUserId);
+    const uploaded = await prepareUpload(this.api, voiceBuf, toUserId, UploadMediaType.VOICE);
+
+    const voiceItem = {
+      type: MessageItemType.VOICE,
+      voice_item: {
+        media: {
+          encrypt_query_param: uploaded.downloadEncryptedQueryParam,
+          aes_key: Buffer.from(uploaded.aeskey, 'hex').toString('base64'),
+          encrypt_type: 1,
+        },
+        encode_type: options.encodeType || VoiceEncodeType.SILK,
+        sample_rate: options.sampleRate || 24000,
+        bits_per_sample: options.bitsPerSample || 16,
+        playtime: options.playtime || 0,
+      },
+    };
+
+    await this.api.sendMessage(toUserId, [voiceItem], contextToken);
+  }
+
   // ── Media download ──
 
   async downloadImage(imageItem, cdnBaseUrl) {
     const media = imageItem.media;
     if (!media?.encrypt_query_param) throw new Error('No encrypt_query_param in image');
-    if (!media.aes_key) throw new Error('No aes_key in image media');
-    return downloadMedia(media.encrypt_query_param, media.aes_key, cdnBaseUrl || this.api.cdnUrl);
+    // Official protocol: imageItem.aeskey (hex) takes priority over media.aes_key (base64)
+    const aesKey = imageItem.aeskey
+      ? Buffer.from(imageItem.aeskey, 'hex').toString('base64')
+      : media.aes_key;
+    if (!aesKey) throw new Error('No aes_key in image');
+    return downloadMedia(media.encrypt_query_param, aesKey, cdnBaseUrl || this.api.cdnUrl);
   }
 
   async downloadVoice(voiceItem, cdnBaseUrl) {
@@ -318,6 +381,11 @@ export class WeixinBot extends EventEmitter {
     const media = videoItem.media;
     if (!media?.encrypt_query_param || !media.aes_key) throw new Error('Missing video media info');
     return downloadMedia(media.encrypt_query_param, media.aes_key, cdnBaseUrl || this.api.cdnUrl);
+  }
+
+  /** Download raw CDN bytes without decryption (for cases where aes_key is unavailable). */
+  async downloadRaw(encryptQueryParam, cdnBaseUrl) {
+    return downloadMediaRaw(encryptQueryParam, cdnBaseUrl || this.api.cdnUrl);
   }
 
   // ── Typing indicator ──
