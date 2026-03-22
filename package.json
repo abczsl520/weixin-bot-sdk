@@ -1,0 +1,43 @@
+{
+  "name": "weixin-bot-sdk",
+  "version": "1.0.0",
+  "description": "Unofficial WeChat Bot SDK for Node.js — built on the iLink Bot API. Zero dependencies. Full TypeScript support.",
+  "type": "module",
+  "main": "src/index.js",
+  "types": "types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts",
+      "default": "./src/index.js"
+    }
+  },
+  "files": [
+    "src/",
+    "types/",
+    "LICENSE",
+    "README.md",
+    "README.zh-CN.md"
+  ],
+  "scripts": {
+    "example:echo": "node examples/echo-bot.js",
+    "example:ai": "node examples/ai-chatbot.js",
+    "test": "node --input-type=module test/run.js"
+  },
+  "keywords": [
+    "weixin", "wechat", "bot", "chatbot", "ilink",
+    "wechat-bot", "weixin-bot", "messaging", "sdk"
+  ],
+  "author": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abczsl520/weixin-bot-sdk.git"
+  },
+  "homepage": "https://github.com/abczsl520/weixin-bot-sdk#readme",
+  "bugs": {
+    "url": "https://github.com/abczsl520/weixin-bot-sdk/issues"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
