@@ -23,9 +23,9 @@
 
 ## ⚠️ Compatibility
 
-> **Currently supports iOS WeChat 8.0.70 only.** Android is not yet supported (pending WeChat's official rollout).
+> **iOS**: Supports WeChat 8.0.70. After updating to the latest version, you must **force-quit WeChat from the background and reopen it** before the bot can connect.
 >
-> After updating iOS WeChat to the latest version, you must **force-quit WeChat from the background and reopen it** before the bot can connect.
+> **Android**: Now supported! After generating the QR code with the SDK or Bot, scanning it will prompt a WeChat update. Download the update and scan again. Android may have some bugs — please test first.
 
 ---
 
@@ -244,7 +244,7 @@ bot.on('message', async (msg: ParsedMessage) => {
 - Bots can only receive messages users **send directly to the bot**
 - Bots **cannot** monitor all chats or act as a personal account
 - **Zero ban risk** — legitimate bot platform by Tencent
-- **Currently supports iOS WeChat 8.0.70 only**, Android not yet supported
+- **Currently supports iOS WeChat 8.0.70 only**, Android now supported (may have bugs)
 
 ---
 
